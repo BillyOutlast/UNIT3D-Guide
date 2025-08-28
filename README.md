@@ -35,7 +35,7 @@ sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php -y
 sudo apt update
 
 # Install PHP.
-sudo apt-get install -y php8.4 php8.4-curl php8.4-zip php8.4-xml php8.4-bcmath php8.4-intl php8.4-mysql php8.4-mbstring mariadb-client-core
+sudo apt-get install -y php8.4 php8.4-curl php8.4-zip php8.4-xml php8.4-bcmath php8.4-intl php8.4-mysql php8.4-redis php8.4-mbstring mariadb-client-core
 ```
 ### Debian
 
