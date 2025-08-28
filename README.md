@@ -2,14 +2,17 @@
 
 ## 1. Install Docker and Docker Compose on Linux
 ### Ubuntu/Debian
+```bash
 sudo apt update
 sudo apt install -y docker.io docker-compose
-
+```
 
 
 ### Arch Linux
+```bash
 sudo pacman -Syu
 sudo pacman -S docker docker-compose
+```
 
 # Enable and Start Docker
 
