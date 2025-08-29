@@ -1,58 +1,6 @@
 # Unit3d Setup Guide
 
 
-## Windows Users: Enable WSL Integration
-
-To install WSL with Ubuntu 24.04, open PowerShell as Administrator and run:
-
-```powershell
-wsl --install -d Ubuntu-24.04
-```
-
-After installation, restart your computer if prompted. Then, launch Ubuntu from the Start menu to complete setup.
-
-If you are using Windows, ensure that WSL integration is enabled in Docker Desktop for containers to work properly:
-
-1. Open Docker Desktop.
-2. Go to **Settings** > **Resources** > **WSL Integration**.
-3. Enable integration for your desired WSL distributions (e.g., Ubuntu).
-
-### Enable Mirrored Networking Mode in WSL
-
-To improve network compatibility for Docker containers on Windows, enable "mirrored" networking mode in WSL:
-
-1. Open Docker Desktop.
-2. Go to **Settings** > **WSL** > **Networking**.
-3. Set **Network Mode** to **Mirrored**.
-
-This ensures containers have better access to network resources and services.
-
-This allows Docker containers to run seamlessly with WSL on Windows.
-
-### 1. Confirm MySQL Host and Port
-
-- If using Laravel Sail, set `DB_HOST` to `mysql` (the service name in `docker-compose.yml`), not `127.0.0.1`.
-- Example for Sail:
-
-    ```env
-    DB_HOST=mysql
-    ```
-
-- Ensure your `.env` file has the correct Redis host configuration for Sail:
-
-    ```env
-    REDIS_HOST=redis
-    ```
-
-
-
-- If you encounter "Connection refused", verify the Redis container is running:
-
-    ```bash
-    ./vendor/bin/sail ps
-    ./vendor/bin/sail up -d redis
-    ```
-
 
 
 
