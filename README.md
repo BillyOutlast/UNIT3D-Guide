@@ -158,7 +158,7 @@ or Log out and back in for the group change to take effect.
 
 This will start the required Docker containers in detached mode.
 
-For troubleshooting MySQL root user errors, see [Fix MySQL root user error](./TROUBLESHOOTING.md#fix-mysql-root-user-error).
+For troubleshooting MySQL root user errors, see [Fix MySQL root user error](./Troubleshooting.md#fix-mysql-root-user-error).
 
 
 ## 10. Generate Application Key
