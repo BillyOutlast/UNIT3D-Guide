@@ -1,5 +1,52 @@
 # Unit3d Setup Guide
 
+
+## Windows Users: Enable WSL Integration
+
+If you are using Windows, ensure that WSL integration is enabled in Docker Desktop for containers to work properly:
+
+1. Open Docker Desktop.
+2. Go to **Settings** > **Resources** > **WSL Integration**.
+3. Enable integration for your desired WSL distributions (e.g., Ubuntu).
+
+### Enable Mirrored Networking Mode in WSL
+
+To improve network compatibility for Docker containers on Windows, enable "mirrored" networking mode in WSL:
+
+1. Open Docker Desktop.
+2. Go to **Settings** > **WSL** > **Networking**.
+3. Set **Network Mode** to **Mirrored**.
+
+This ensures containers have better access to network resources and services.
+
+This allows Docker containers to run seamlessly with WSL on Windows.
+
+### 1. Confirm MySQL Host and Port
+
+- If using Laravel Sail, set `DB_HOST` to `mysql` (the service name in `docker-compose.yml`), not `127.0.0.1`.
+- Example for Sail:
+
+    ```env
+    DB_HOST=mysql
+    ```
+
+- Ensure your `.env` file has the correct Redis host configuration for Sail:
+
+    ```env
+    REDIS_HOST=redis
+    ```
+
+- If you encounter "Connection refused", verify the Redis container is running:
+
+    ```bash
+    ./vendor/bin/sail ps
+    ./vendor/bin/sail up -d redis
+    ```
+
+
+
+
+
 ## 1. Install Docker and Docker Compose on Linux
 ### Ubuntu/Debian
 ```bash
@@ -35,7 +82,7 @@ sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php -y
 sudo apt update
 
 # Install PHP.
-sudo apt-get install -y php8.4 php8.4-curl php8.4-zip php8.4-xml php8.4-bcmath php8.4-intl php8.4-mysql php8.4-redis php8.4-mbstring mariadb-client-core
+sudo apt-get install -y php8.4 php8.4-curl php8.4-zip php8.4-xml php8.4-bcmath php8.4-intl php8.4-mysql php8.4-redis php8.4-mbstring mariadb-client-core unzip
 ```
 ### Debian
 
@@ -49,7 +96,7 @@ sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.
 sudo apt-get update
 
 # Install PHP.
-sudo apt-get install -y php8.4 php8.4-curl php8.4-zip php8.4-xml php8.4-bcmath php8.4-intl php8.4-mysql php8.4-redis php8.4-mbstring mariadb-client-core
+sudo apt-get install -y php8.4 php8.4-curl php8.4-zip php8.4-xml php8.4-bcmath php8.4-intl php8.4-mysql php8.4-redis php8.4-mbstring mariadb-client-core unzip
 ```
 
 ### Arch Linux
@@ -130,150 +177,186 @@ composer update
 composer install
 ```
 
-## 8. Generate Application Key
+## 8. Start UNIT3D with Laravel Sail
 
-Run the following command inside the `UNIT3D` directory to initialize the application key:
+Before starting UNIT3D, add your user to the Docker group to run Docker commands without `sudo`:
 
 ```bash
-php artisan key:generate
+sudo usermod -aG docker $USER
+newgrp docker
 ```
 
-## 9. Start UNIT3D with Laravel Sail
+or Log out and back in for the group change to take effect.
 
-Run the following command inside the `UNIT3D` directory to start the application in detached mode:
+9. To start the application using Laravel Sail, run:
 
 ```bash
 ./vendor/bin/sail up -d
 ```
 
-## 10. Run Database Migrations and Seed Data
+This will start the required Docker containers in detached mode.
 
-After starting UNIT3D, run the following command inside the `UNIT3D` directory to reset and seed the database:
 
-```bash
-php artisan migrate:fresh --seed
-```
+## 10. Generate Application Key
 
-## 11. Set Permissions for `node_modules`
-
-If you need to create the `node_modules` directory and set permissions, run:
+After starting the containers, generate the Laravel application key:
 
 ```bash
-mkdir node_modules
-chmod 777 -R node_modules
+./vendor/bin/sail artisan key:generate
 ```
 
-> **Warning:** Setting permissions to `777` allows all users to read, write, and execute files in `node_modules`. Use with caution and only in development environments.
+This command sets the `APP_KEY` value in your `.env` file, which is required for application security.
 
-## 12. Install and Build Frontend Assets with Bun
 
-To install frontend dependencies and build assets using Bun, run the following commands inside the `UNIT3D` directory:
+## 11. Run Database Migrations and Seed Data
+
+To set up the database schema and seed initial data, run:
 
 ```bash
-sudo ./vendor/bin/sail bun install
-sudo ./vendor/bin/sail bun run build
+./vendor/bin/sail artisan migrate:fresh --seed
 ```
 
-## 13. Create the `public/build/assets` Directory
+## 12. Manage Node.js Dependencies and Compile Assets
 
-To manually create the `public/build/assets` directory, run:
+To install Node.js dependencies and build frontend assets within the Docker environment, run:
 
 ```bash
-sudo mkdir -p public/build/assets
+./vendor/bin/sail bun install
+./vendor/bin/sail bun run build
 ```
 
-## 14. Set Permissions for the `public` Directory
-
-To set permissions for the `public` directory, run:
+If you need to refresh the Node.js environment (e.g., after updating dependencies), use:
 
 ```bash
-sudo chmod 777 -R public/
+./vendor/bin/sail rm -rf node_modules && bun pm cache rm && bun install && bun run build
 ```
 
-## 15. Build Frontend Assets
+## 13. Application Cache Configuration
 
-After setting permissions, build the frontend assets:
+Optimize performance by setting up the cache:
 
 ```bash
-sudo ./vendor/bin/sail bun run build
+./vendor/bin/sail artisan set:all_cache
 ```
 
-## 16. Configure Application Cache
+## 14. Environment Restart
 
-Optimize the application's performance by setting up the cache:
+Apply new configurations or restart the environment:
 
 ```bash
-php artisan set:all_cache
+./vendor/bin/sail restart && ./vendor/bin/sail artisan queue:restart
 ```
 
-## 17. Create the `storage/logs` Directory
+---
 
-To manually create the `storage/logs` directory, run:
+## Additional Notes
 
-```bash
-mkdir -p storage/logs
-```
+- **Permissions:** Use `sudo` cautiously to avoid permission conflicts, especially with Docker commands requiring elevated access.
 
-## 18. Restart Environment
+---
 
-Apply new configurations or restart the environment by toggling the Docker environment:
+## Appendix: Sail Commands for UNIT3D
 
-```bash
-./vendor/bin/sail restart
-php artisan queue:restart
-```
+### Docker Management
 
-You need to create the required self-signed SSL certificate and key pair and ensure they are placed in the correct location so the Nginx container can access them.
+- **Start environment:**
+    ```bash
+    ./vendor/bin/sail up -d
+    ```
+    Starts Docker containers in detached mode.
 
-Stop the running containers if they are not already stopped.
+- **Stop environment:**
+    ```bash
+    ./vendor/bin/sail down
+    ```
+    Stops and removes Docker containers.
 
-Bash
+- **Restart environment:**
+    ```bash
+    ./vendor/bin/sail restart
+    ```
+    Applies changes by restarting the Docker environment.
 
-./vendor/bin/sail stop
-Generate a self-signed SSL certificate and private key. You can use the OpenSSL command for this. Run this command from your project's root directory.
+### Dependency Management
 
-Bash
+- **Install Composer dependencies:**
+    ```bash
+    ./vendor/bin/sail composer install
+    ```
+    Installs PHP dependencies.
 
-mkdir -p ./certs
-openssl req -x509 -newkey rsa:2048 -nodes -keyout ./certs/server.key -out ./certs/server.pem -days 365 -subj "/CN=localhost"
-mkdir -p ./certs: Creates a new directory named certs in your project root to store the certificate files.
+- **Update Composer dependencies:**
+    ```bash
+    ./vendor/bin/sail composer update
+    ```
+    Updates PHP dependencies.
 
-openssl req ...: This is the command to generate the certificate.
+### Laravel Artisan
 
--x509: Creates a self-signed certificate instead of a certificate signing request.
+- **Run migrations:**
+    ```bash
+    ./vendor/bin/sail artisan migrate
+    ```
+    Executes database migrations.
 
--newkey rsa:2048: Generates a new RSA private key with a size of 2048 bits.
+- **Seed database:**
+    ```bash
+    ./vendor/bin/sail artisan db:seed
+    ```
+    Seeds the database.
 
--nodes: Skips encrypting the private key with a passphrase.
+- **Refresh database:**
+    ```bash
+    ./vendor/bin/sail artisan migrate:fresh --seed
+    ```
+    Resets and seeds the database.
 
--keyout ./certs/server.key: Specifies the output path for the private key.
+- **Cache configurations:**
+    ```bash
+    ./vendor/bin/sail artisan set:all_cache
+    ```
+    Clears and caches configurations.
 
--out ./certs/server.pem: Specifies the output path for the certificate.
+### NPM and Assets
 
--days 365: Sets the certificate's validity period to one year.
+- **Install Node.js dependencies:**
+    ```bash
+    ./vendor/bin/sail bun install
+    ```
+    Installs Node.js dependencies.
 
--subj "/CN=localhost": Sets the common name for the certificate to localhost.
+- **Compile assets:**
+    ```bash
+    ./vendor/bin/sail bun run build
+    ```
+    Compiles CSS and JavaScript assets.
 
-Update the docker-compose.yml file. You must now instruct Docker to mount the newly created certs directory from your host machine into the Nginx container. Find the nginx service section in your docker-compose.yml file and add a volume mapping.
+### Database Operations
 
-Find this line:
+- **MySQL interaction:**
+    ```bash
+    ./vendor/bin/sail mysql -u root -p
+    ```
+    Opens MySQL CLI.
 
-YAML
+### Queue Management
 
-volumes:
-    - 'sail-nginx:/etc/nginx/certs'
-Add a new mapping for your generated files:
+- **Restart queue workers:**
+    ```bash
+    ./vendor/bin/sail artisan queue:restart
+    ```
+    Restarts queue workers.
 
-YAML
+### Troubleshooting
 
-volumes:
-    - './certs:/etc/nginx/certs'
-    - 'sail-nginx:/etc/nginx/certs' # You might need to check if this line is still needed or can be removed
-The sail-nginx volume is what Laravel Sail uses to manage certificates, but manually mounting your local certs directory is the most direct way to solve this specific error.
+- **View logs:**
+    ```bash
+    ./vendor/bin/sail logs
+    ```
+    Displays Docker container logs.
 
-Restart your services using sail up to apply the changes.
-
-Bash
-
-./vendor/bin/sail up -d
-After these steps, the Nginx container will be able to find and load the certificate and private key, allowing it to start successfully.
+- **Run PHPUnit (PEST) tests:**
+    ```bash
+    ./vendor/bin/sail artisan test
+    ```
+    Runs PEST tests for the application.
