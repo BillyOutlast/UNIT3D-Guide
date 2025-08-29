@@ -233,6 +233,9 @@ To install Node.js dependencies and build frontend assets within the Docker envi
 
 ```bash
 ./vendor/bin/sail bun install
+./vendor/bin/sail bun pm untrusted
+./vendor/bin/sail bun pm trust --all
+./vendor/bin/sail bun install
 ./vendor/bin/sail bun run build
 ```
 
@@ -352,6 +355,13 @@ Apply new configurations or restart the environment:
 
 - **Fix MySQL root user error:**
     If you encounter `ERROR 1396 (HY000) ... CREATE USER failed for 'root'@'%'`, run the following inside the MySQL CLI:
+    To execute MySQL commands directly inside the running MySQL container, use:
+
+    ```bash
+    ./vendor/bin/sail exec mysql mysql -u root -p
+    ```
+
+    This opens a MySQL shell as the root user. Enter your password when prompted.
     ```sql
     ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_root_password';
     FLUSH PRIVILEGES;
@@ -390,3 +400,6 @@ Apply new configurations or restart the environment:
     ./vendor/bin/sail artisan test
     ```
     Runs PEST tests for the application.
+
+
+    
