@@ -3,6 +3,14 @@
 
 ## Windows Users: Enable WSL Integration
 
+To install WSL with Ubuntu 24.04, open PowerShell as Administrator and run:
+
+```powershell
+wsl --install -d Ubuntu-24.04
+```
+
+After installation, restart your computer if prompted. Then, launch Ubuntu from the Start menu to complete setup.
+
 If you are using Windows, ensure that WSL integration is enabled in Docker Desktop for containers to work properly:
 
 1. Open Docker Desktop.
