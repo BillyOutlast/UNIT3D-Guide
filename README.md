@@ -36,12 +36,15 @@ This allows Docker containers to run seamlessly with WSL on Windows.
     REDIS_HOST=redis
     ```
 
+
+
 - If you encounter "Connection refused", verify the Redis container is running:
 
     ```bash
     ./vendor/bin/sail ps
     ./vendor/bin/sail up -d redis
     ```
+
 
 
 
@@ -194,12 +197,20 @@ or Log out and back in for the group change to take effect.
 ./vendor/bin/sail up -d
 ```
 
+> **Tip:** The MySQL container may need to be restarted multiple times during initial setup. If you encounter connection issues, run:
+>
+> ```bash
+> ./vendor/bin/sail restart mysql
+> ```
+>
+> Wait a few moments after each restart before retrying your commands.
+
 This will start the required Docker containers in detached mode.
 
 
 ## 10. Generate Application Key
 
-After starting the containers, generate the Laravel application key:
+Before generating the Laravel application key, ensure your `.env` file contains an `APP_KEY` variable (it can be empty):
 
 ```bash
 ./vendor/bin/sail artisan key:generate
@@ -338,6 +349,25 @@ Apply new configurations or restart the environment:
     ./vendor/bin/sail mysql -u root -p
     ```
     Opens MySQL CLI.
+
+- **Fix MySQL root user error:**
+    If you encounter `ERROR 1396 (HY000) ... CREATE USER failed for 'root'@'%'`, run the following inside the MySQL CLI:
+    ```sql
+    ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'your_root_password';
+    FLUSH PRIVILEGES;
+    ```
+    Replace `'your_root_password'` with your desired password.
+
+- **Fix time zone warnings:**
+    To resolve time zone warnings, install the time zone info in your MySQL container:
+    ```bash
+    ./vendor/bin/sail exec mysql bash -c "apt-get update && apt-get install -y tzdata && mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -pYOUR_PASSWORD mysql"
+    ```
+    Replace `YOUR_PASSWORD` with your MySQL root password.
+
+
+
+
 
 ### Queue Management
 
