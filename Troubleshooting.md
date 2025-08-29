@@ -1,4 +1,12 @@
 
+- **Rerun Composer after updating `.env`:**
+    After making changes to your `.env` file, run the following commands to update dependencies and regenerate autoload files:
+    ```bash
+    ./vendor/bin/sail composer update
+    ./vendor/bin/sail composer install
+    ```
+    This ensures your application uses the latest configuration and dependencies.
+
 - **Fix MySQL root user error:**
     If you encounter `ERROR 1396 (HY000) ... CREATE USER failed for 'root'@'%'`, run the following inside the MySQL CLI:
     To execute MySQL commands directly inside the running MySQL container, use:
