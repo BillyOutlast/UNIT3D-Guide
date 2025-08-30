@@ -5,22 +5,21 @@
 sudo dnf update
 ```
 
-## 2. Install Docker
+## 2. Install Podman
 ```sh
-sudo dnf install -y docker
+sudo dnf install -y podman
 ```
 
-## 3. Install Docker-Compose
+## 3. Install Podman-Compose
 ```sh
-sudo dnf install -y docker-compose
+sudo dnf install -y podman-compose
 ```
 
 ## 4. Verify Installation
 ```sh
-docker --version
-docker-compose --version
+podman --version
+podman-compose --version
 ```
-
 
 ## 5. Add Remi's RPM Repository
 
@@ -36,7 +35,6 @@ sudo dnf module enable php:remi-8.4 -y
 ```sh
 sudo dnf install -y php
 ```
-
 
 ## 7. Install Additional PHP Extensions
 
@@ -64,21 +62,7 @@ sudo dnf install -y php-bcmath php-intl php-redis mariadb
 sudo dnf install -y unzip composer
 ```
 
-## 11. Enable and Start Docker Service
-
-```sh
-sudo systemctl enable docker
-sudo systemctl start docker
-```
-
-## 12. Add Your User to the Docker Group
-
-```sh
-sudo usermod -aG docker $USER
-newgrp docker
-```e
-
-## 13. Copy the Environment File
+## 11. Copy the Environment File
 
 After cloning the repository, copy the example environment file:
 
@@ -86,7 +70,7 @@ After cloning the repository, copy the example environment file:
 cp .env.example .env
 ```
 
-## 14. Install Dependencies with Composer
+## 12. Install Dependencies with Composer
 
 Run the following commands inside the UNIT3D directory to install and update PHP dependencies:
 
@@ -95,3 +79,38 @@ composer update
 composer install
 ```
 
+## 13. Generate Application Key
+
+Before generating the Laravel application key, ensure your `.env` file contains an `APP_KEY` variable (it can be empty):
+
+```sh
+php artisan key:generate
+```
+
+This command sets the `APP_KEY` value in your `.env` file, which is required for application security.
+
+## 14. Run Database Migrations and Seed Data
+
+To set up the database schema and seed initial data, run:
+
+```sh
+php artisan migrate:fresh --seed
+```
+
+## 15. Manage Node.js Dependencies and Compile Assets
+
+To install Node.js dependencies and build frontend assets within the Docker environment, run:
+
+```sh
+./vendor/bin/sail bun install
+./vendor/bin/sail bun pm untrusted
+./vendor/bin/sail bun pm trust --all
+./vendor/bin/sail bun install
+./vendor/bin/sail bun run build
+```
+
+If you need to refresh the Node.js environment (for example, after updating dependencies), use:
+
+```sh
+./vendor/bin/sail rm -rf node_modules && bun pm cache rm && bun install && bun run build
+```
