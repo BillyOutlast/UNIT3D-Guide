@@ -76,4 +76,22 @@ sudo systemctl start docker
 ```sh
 sudo usermod -aG docker $USER
 newgrp docker
+```e
+
+## 13. Copy the Environment File
+
+After cloning the repository, copy the example environment file:
+
+```sh
+cp .env.example .env
 ```
+
+## 14. Install Dependencies with Composer
+
+Run the following commands inside the UNIT3D directory to install and update PHP dependencies:
+
+```sh
+composer update
+composer install
+```
+
